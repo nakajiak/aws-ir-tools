@@ -3,13 +3,13 @@
 ## dump_cloudtrail_from_all_region.sh
 
 1. Dump AWS CloudTrail as JSON format from all region
-    * `CloudTrail-<region>-<datetime>-<seq_number>.json`
+    * `cloudtrail_files/CloudTrail-<region>-<datetime>-<seq_number>.json`
 1. sha1sum cloudtrail
-    * `CloudTrail-<region>-<datetime>-<seq_number>.json.sha1`
+    * `cloudtrail_files/CloudTrail-<region>-<datetime>-<seq_number>.json.sha1`
 1. Convert json to S3 exported format and compress each dumped json
-    * `CloudTrail-<region>-<datetime>-<seq_number>.json.gz`
+    * `cloudtrail_files/CloudTrail-<region>-<datetime>-<seq_number>.json.gz`
 1. Archive all dumped json and sha1. Then delete json and sha1
-    * `dumped_cloudtrail-<datetime>.tgz`
+    * `cloudtrail_files/dumped_cloudtrail-<datetime>.zip`
 
 ### Required
 
@@ -19,18 +19,19 @@
 
 ### Usage
 
-Execute following command on CloudShell or EC2 with admin privilege IAM Role.
+Execute following command on CloudShell.
 
 ```shell
 bash <(curl -s -o- https://raw.githubusercontent.com/nakajiak/aws-ir-tools/main/dump_cloudtrail_from_all_region.sh)
 ```
 
-OR
+### Analysis CloudTrail with SIEM
+
+If you setup [SIEM on Amazon Elasticsearch Service](https://github.com/aws-samples/siem-on-amazon-elasticsearch/), you can send CloudTrail logs to SIEM S3 bucket and analysis logs with SIEM.
 
 ```shell
-git clone https://github.com/nakajiak/aws-ir-tools.git
-cd aws-ir-tools
-./dump_cloudtrail_from_all_region.sh
+ACCOUNT=$(aws sts get-caller-identity --query 'Account' --output text)
+aws s3 cp cloudtrail_files/ s3://aes-siem-${ACCOUNT}-log/AWSLogs/CloudTrail/ --recursive --exclude "*" --include "*.gz"
 ```
 
 ## License
